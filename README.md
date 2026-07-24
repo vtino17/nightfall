@@ -1,5 +1,7 @@
 # Nightfall
 
+[![CI](https://github.com/vtino17/nightfall/actions/workflows/ci.yml/badge.svg)](https://github.com/vtino17/nightfall/actions/workflows/ci.yml)
+
 Modular vulnerability scanning framework with plugin architecture, web dashboard, multi-format reporting, scheduled scanning, and notifications.
 
 ## Features
