@@ -3,5 +3,11 @@
 Network security vulnerability scanner
 
 ## Quick Start
-pip install -r requirements.txt
-python main.py
+
+```bash
+pip install -e .
+nightfall --help
+```
+
+Nightfall depends only on the standard library, so there is nothing else to
+install.

@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ScanDatabase:
@@ -51,7 +51,7 @@ class ScanDatabase:
         with self._conn() as conn:
             cur = conn.execute(
                 "INSERT INTO scans (name, targets, ports, started_at, status) VALUES (?, ?, ?, ?, ?)",
-                [name, json.dumps(targets), ports, datetime.utcnow().isoformat(), "running"],
+                [name, json.dumps(targets), ports, datetime.now(timezone.utc).isoformat(), "running"],
             )
             return cur.lastrowid
 
@@ -59,7 +59,7 @@ class ScanDatabase:
         with self._conn() as conn:
             conn.execute(
                 "UPDATE scans SET completed_at=?, duration_ms=?, status=?, summary=?, error=? WHERE id=?",
-                [datetime.utcnow().isoformat(), duration_ms, "complete" if not error else "failed",
+                [datetime.now(timezone.utc).isoformat(), duration_ms, "complete" if not error else "failed",
                  json.dumps(summary), error, scan_id],
             )
 

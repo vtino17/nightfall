@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from nightfall.reporters.base import BaseReporter
 
@@ -77,7 +77,7 @@ class HTMLReporter(BaseReporter):
                 if sev in breakdown:
                     breakdown[sev] += 1
         return {
-            "generated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "total_targets": len(findings),
             "open_ports": sum(1 for f in findings if f.get("status") == "open"),
             "closed_ports": sum(1 for f in findings if f.get("status") == "closed"),
