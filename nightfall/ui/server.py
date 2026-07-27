@@ -1,7 +1,7 @@
 import json
 import http.server
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class APIHandler(http.server.BaseHTTPRequestHandler):
@@ -27,7 +27,7 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
 
         if parsed.path == "/api/scan":
             data = json.loads(body)
-            self._json({"message": "scan queued", "target": data.get("target", ""), "id": datetime.utcnow().isoformat()})
+            self._json({"message": "scan queued", "target": data.get("target", ""), "id": datetime.now(timezone.utc).isoformat()})
         elif parsed.path == "/api/schedule":
             data = json.loads(body)
             self._json({"message": "scheduled", "target": data.get("target", ""), "interval": data.get("interval", "daily")})

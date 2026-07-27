@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from nightfall.reporters.base import BaseReporter
 
@@ -10,7 +10,7 @@ class JSONReporter(BaseReporter):
 
     def generate(self, findings, metadata=None):
         report = {
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "metadata": metadata or {},
             "summary": self._summarize(findings),
             "findings": findings,

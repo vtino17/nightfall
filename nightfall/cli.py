@@ -1,7 +1,7 @@
 import argparse
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def build_parser():
@@ -68,7 +68,7 @@ def entry_point():
         scan_results = scanner.analyze(results, cve_lookup=args.cve, severity=args.severity)
 
         reporter = ReporterFactory.create(args.format)
-        out = args.output or f"nightfall_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.{args.format}"
+        out = args.output or f"nightfall_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.{args.format}"
         reporter.generate(scan_results, out)
         print(f"Report: {out}", file=sys.stderr)
 

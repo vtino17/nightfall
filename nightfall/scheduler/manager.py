@@ -2,7 +2,24 @@ import time
 import threading
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+
+def _utcnow():
+    return datetime.now(timezone.utc)
+
+
+def _parse_utc(value):
+    """Parse a persisted ISO timestamp as UTC.
+
+    State files written before timestamps carried an offset hold naive
+    strings. Comparing one against an aware now() raises TypeError, so
+    anything without tzinfo is treated as the UTC it was always meant to be.
+    """
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 class ScanSchedule:
@@ -13,7 +30,7 @@ class ScanSchedule:
         self.ports = ports
         self.plugins = plugins or []
         self.last_run = None
-        self.next_run = datetime.utcnow()
+        self.next_run = _utcnow()
         self.enabled = True
 
     def to_dict(self):
@@ -33,9 +50,9 @@ class ScanSchedule:
         s = cls(data["name"], data["targets"], data["interval_hours"],
                 ports=data.get("ports"), plugins=data.get("plugins"))
         if data.get("last_run"):
-            s.last_run = datetime.fromisoformat(data["last_run"])
+            s.last_run = _parse_utc(data["last_run"])
         if data.get("next_run"):
-            s.next_run = datetime.fromisoformat(data["next_run"])
+            s.next_run = _parse_utc(data["next_run"])
         s.enabled = data.get("enabled", True)
         return s
 
@@ -76,7 +93,7 @@ class SchedulerManager:
 
     def _loop(self):
         while self._running:
-            now = datetime.utcnow()
+            now = _utcnow()
             for schedule in self.schedules:
                 if schedule.enabled and now >= schedule.next_run:
                     try:
@@ -90,7 +107,7 @@ class SchedulerManager:
 
     def _save_state(self):
         try:
-            data = {"saved_at": datetime.utcnow().isoformat(),
+            data = {"saved_at": _utcnow().isoformat(),
                     "schedules": [s.to_dict() for s in self.schedules]}
             with open(self.state_path, "w") as f:
                 json.dump(data, f, indent=2)

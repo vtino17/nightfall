@@ -1,6 +1,6 @@
 import ssl
 import socket
-from datetime import datetime
+from datetime import datetime, timezone
 
 from nightfall.core.plugin import BasePlugin
 
@@ -49,8 +49,12 @@ class SSLCheck(BasePlugin):
             not_after = cert.get("notAfter", "")
             result["expiry"] = not_after
             try:
+                # strptime's %Z parses the trailing "GMT" but does not attach a
+                # tzinfo, so the result is naive and cannot be subtracted from
+                # an aware now(). X.509 notAfter is always UTC.
                 expiry_dt = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
-                remaining = (expiry_dt - datetime.utcnow()).days
+                expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+                remaining = (expiry_dt - datetime.now(timezone.utc)).days
                 result["days_remaining"] = remaining
                 if remaining < 0:
                     result["issues"].append("Certificate expired")

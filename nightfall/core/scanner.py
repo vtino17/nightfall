@@ -1,6 +1,6 @@
 import re
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 SEVERITY_LEVELS = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
@@ -53,7 +53,7 @@ class Scanner:
             "status": target.status,
             "banner": getattr(target, "banner", None),
             "vulnerabilities": [],
-            "scan_time": datetime.utcnow().isoformat(),
+            "scan_time": datetime.now(timezone.utc).isoformat(),
         }
         for rule in VULN_PATTERNS:
             if rule["pattern"] and result.get("banner"):
