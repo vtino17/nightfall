@@ -4,6 +4,13 @@ import json
 from datetime import datetime, timezone
 
 
+def positive_int(value):
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def build_parser():
     p = argparse.ArgumentParser(description="Nightfall - Vulnerability Scanning Framework")
     s = p.add_subparsers(dest="command")
@@ -15,8 +22,8 @@ def build_parser():
     sc.add_argument("--format", "-f", choices=["json", "html", "csv", "sarif"], default="json")
     sc.add_argument("--cve", action="store_true")
     sc.add_argument("--severity", choices=["critical", "high", "medium", "low"], default="medium")
-    sc.add_argument("--rate", type=int, default=100)
-    sc.add_argument("--timeout", type=int, default=5)
+    sc.add_argument("--rate", type=positive_int, default=100)
+    sc.add_argument("--timeout", type=positive_int, default=5)
     sc.add_argument("--plugins", nargs="+", default=None)
     sc.add_argument("--verbose", "-v", action="store_true")
 
@@ -55,14 +62,11 @@ def entry_point():
         from nightfall.core.discovery import ServiceDiscovery
         from nightfall.reporters.factory import ReporterFactory
 
-        targets = TargetParser.parse(args.target, args.ports)
+        targets = TargetParser().parse(args.target, args.ports)
         print(f"Targets: {len(targets)}", file=sys.stderr)
 
-        discovery = ServiceDiscovery(rate=args.rate, timeout=args.timeout)
-        results = []
-        for t in targets:
-            r = discovery.identify(t)
-            results.append(r)
+        discovery = ServiceDiscovery(timeout=args.timeout)
+        results = discovery.identify_many(targets, workers=args.rate)
 
         scanner = Scanner()
         scan_results = scanner.analyze(results, cve_lookup=args.cve, severity=args.severity)
