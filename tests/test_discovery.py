@@ -30,3 +30,14 @@ class TestServiceDiscovery:
         assert SERVICE_PORT_MAP[22] == "ssh"
         assert SERVICE_PORT_MAP[80] == "http"
         assert SERVICE_PORT_MAP[443] == "https"
+
+    def test_propagates_discovered_banner_to_scan_target(self):
+        target = ScanTarget("example.com", 22)
+        self.disc._check_port = lambda *_args: {
+            "status": "open",
+            "service": "ssh",
+            "banner": "SSH-2.0-OpenSSH_7.4",
+        }
+
+        result = self.disc.identify(target)
+        assert result.banner == "SSH-2.0-OpenSSH_7.4"

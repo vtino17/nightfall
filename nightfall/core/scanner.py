@@ -56,7 +56,15 @@ class Scanner:
             "scan_time": datetime.now(timezone.utc).isoformat(),
         }
         for rule in VULN_PATTERNS:
-            if rule["pattern"] and result.get("banner"):
+            if rule["id"] == "PORT-002":
+                if result.get("service") and rule["pattern"].match(result["service"]):
+                    result["vulnerabilities"].append({
+                        "id": "PORT-002",
+                        "name": "Sensitive Service Exposed",
+                        "severity": "medium",
+                        "source": "heuristic"
+                    })
+            elif rule["pattern"] and result.get("banner"):
                 if rule["pattern"].search(result["banner"]):
                     result["vulnerabilities"].append({
                         "id": rule["id"],
@@ -70,14 +78,6 @@ class Scanner:
                         "id": "PORT-001",
                         "name": "Non-Standard Port Open",
                         "severity": "low",
-                        "source": "heuristic"
-                    })
-            elif rule["pattern"] and rule["id"] == "PORT-002":
-                if result.get("service") and rule["pattern"].match(result["service"]):
-                    result["vulnerabilities"].append({
-                        "id": "PORT-002",
-                        "name": "Sensitive Service Exposed",
-                        "severity": "medium",
                         "source": "heuristic"
                     })
         return result

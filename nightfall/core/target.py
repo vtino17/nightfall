@@ -10,6 +10,7 @@ class ScanTarget:
         self.protocol = protocol
         self.service = None
         self.status = "unknown"
+        self.banner = None
         self.vulnerabilities = []
 
     def __repr__(self):

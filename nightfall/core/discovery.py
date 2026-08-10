@@ -27,6 +27,7 @@ class ServiceDiscovery:
         result = self._check_port(target.host, target.port, target.protocol)
         target.status = result.get("status", "closed")
         target.service = result.get("service", "unknown")
+        target.banner = result.get("banner")
         return target
 
     def identify_many(self, targets, workers=100):
