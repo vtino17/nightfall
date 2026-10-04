@@ -38,7 +38,7 @@ def build_parser():
 
     ui = s.add_parser("ui", help="Start web dashboard")
     ui.add_argument("--port", type=int, default=8080)
-    ui.add_argument("--host", default="0.0.0.0")
+    ui.add_argument("--host", default="127.0.0.1")
 
     rp = s.add_parser("report", help="Generate report")
     rp.add_argument("input", help="Input JSON file")
